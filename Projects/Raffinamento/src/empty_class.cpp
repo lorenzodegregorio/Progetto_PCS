@@ -2,9 +2,9 @@
 
 namespace ProjectLibrary
 {
-/// 1. Importa punti, segmenti e celle dai file, con le rispettive proprietà
+/// 1. Importa points, segmenti e cells dai file, con le rispettive proprietà
 
-void ImportPoints(string nomefile, std::vector<Point>& punti)
+void ImportPoints(string nomefile, std::vector<Point>& points)
 {   ifstream file;
     string line;
     file.open(nomefile);
@@ -18,12 +18,12 @@ void ImportPoints(string nomefile, std::vector<Point>& punti)
         double x;
         double y;
         conv >>  id >> marker >> x >> y;
-        punti.push_back(Point(x,y));
+        points.push_back(Point(x,y));
     }
     file.close();
 }
 
-void ImportSegments(string nomefile, std::vector<Point>& punti,std::vector<Segment>& lati)
+void ImportSegments(string nomefile, std::vector<Point>& points,std::vector<Segment>& edges)
 {   ifstream file;
     string line;
     file.open(nomefile);
@@ -36,12 +36,12 @@ void ImportSegments(string nomefile, std::vector<Point>& punti,std::vector<Segme
         int idOrigin;
         int idEnd;
         conv >>  id >> marker >> idOrigin >> idEnd;
-        lati.push_back(Segment(idOrigin,idEnd,punti));
+        edges.push_back(Segment(idOrigin,idEnd,points));
     }
     file.close();
 }
 
-void ImportCells(string nomefile, std::vector<Point>& punti, std::vector<Segment>& lati, std::vector<Cell>& celle)
+void ImportCells(string nomefile, std::vector<Point>& points, std::vector<Segment>& edges, std::vector<Cell>& cells)
 {ifstream file;
     string line;
     file.open(nomefile);
@@ -57,217 +57,217 @@ void ImportCells(string nomefile, std::vector<Point>& punti, std::vector<Segment
         int idlato2;
         int idlato3;
         conv >>  id >> idpunto1 >> idpunto2 >> idpunto3 >> idlato1 >> idlato2 >> idlato3;
-        celle.push_back(Cell(idpunto1,idpunto2,idpunto3,idlato1,idlato2,idlato3,punti));
+        cells.push_back(Cell(idpunto1,idpunto2,idpunto3,idlato1,idlato2,idlato3,points));
 
         // costruisco adiacenze (se il lato 1,2,3 ha cella1 o cella2 = -1
         // metti l'id di cella in cella1 o cella2)
-        if(lati[idlato1].cella1 == -1){lati[idlato1].cella1 = celle.size()-1;}
-        else{lati[idlato1].cella2 = celle.size()-1;}
-        if(lati[idlato2].cella1 == -1){lati[idlato2].cella1 = celle.size()-1;}
-        else{lati[idlato2].cella2 = celle.size()-1;}
-        if(lati[idlato3].cella1 == -1){lati[idlato3].cella1 = celle.size()-1;}
-        else{lati[idlato3].cella2 = celle.size()-1;}
+        if(edges[idlato1].cella1 == -1){edges[idlato1].cella1 = cells.size()-1;}
+        else{edges[idlato1].cella2 = cells.size()-1;}
+        if(edges[idlato2].cella1 == -1){edges[idlato2].cella1 = cells.size()-1;}
+        else{edges[idlato2].cella2 = cells.size()-1;}
+        if(edges[idlato3].cella1 == -1){edges[idlato3].cella1 = cells.size()-1;}
+        else{edges[idlato3].cella2 = cells.size()-1;}
     }
     file.close();
 }
 
 void DividiCella(int& cella,
                  int& lato,
-                 std::vector<Cell>& triangoli,
-                 std::vector<Segment>& lati,
-                 std::vector<Point>& punti,
-                 int& maxIDP,
-                 int& maxIDS,
-                 int& maxIDC){
-    triangoli[cella].flag = false; // Uccido cella
+                 std::vector<Cell>& triangles,
+                 std::vector<Segment>& edges,
+                 std::vector<Point>& points,
+                 int& dim_vect_points,
+                 int& dim_vect_edges,
+                 int& dim_vect_cells){
+    triangles[cella].flag = false; // Uccido cella
     // controllo se lato è stato già diviso (se no lo divido)
-    if (lati[lato].p1m < 0|| lati[lato].mp2 < 0 || lati[lato].pm < 0){
+    if (edges[lato].p1_midpoint < 0|| edges[lato].midpoint_p2 < 0 || edges[lato].midpoint < 0){
         // creo il punto medio
-        PuntoMedio(lati[lato],punti);
-        lati[lato].pm = maxIDP;
-        maxIDP = maxIDP + 1;
+        PuntoMedio(edges[lato],points);
+        edges[lato].midpoint = dim_vect_points;
+        dim_vect_points = dim_vect_points + 1;
 
-        // creo i lati nuovi
-        lati.push_back(Segment(lati[lato].punto1,lati[lato].pm,punti));
-        lati.push_back(Segment(lati[lato].pm,lati[lato].punto2,punti));
-        lati[lato].p1m = maxIDS;
-        lati[lato].mp2 = maxIDS+1;
-        maxIDS = maxIDS+2;
+        // creo i edges nuovi
+        edges.push_back(Segment(edges[lato].punto1,edges[lato].midpoint,points));
+        edges.push_back(Segment(edges[lato].midpoint,edges[lato].punto2,points));
+        edges[lato].p1_midpoint = dim_vect_edges;
+        edges[lato].midpoint_p2 = dim_vect_edges+1;
+        dim_vect_edges = dim_vect_edges+2;
     }
 
-    int verticeopp = VerticeOpposto(triangoli[cella],lati[lato]);
+    int verticeopp = VerticeOpposto(triangles[cella],edges[lato]);
 
     // SE lato è IL LATO MAGGIORE DIVIDO CELLA IN 2
-    if (lato==LatoMaggiore(triangoli[cella],lati)){
+    if (lato==LatoMaggiore(triangles[cella],edges)){
         // creo lato_bisez da punto medio di lato al vertice opposto
-        lati.push_back(Segment(lati[lato].pm,verticeopp,punti));
-        int lato_bisez = maxIDS;
-        maxIDS = maxIDS + 1;
+        edges.push_back(Segment(edges[lato].midpoint,verticeopp,points));
+        int lato_bisez = dim_vect_edges;
+        dim_vect_edges = dim_vect_edges + 1;
         // Faccio puntare l1 al lato che congiunge punto1 a VerticeOpposto e idem con l2 e punto2
         int l1; // id di lato da punto1 di 'lato' a VerticeOpposto
         int l2; // id di lato da punto2 di 'lato' a VerticeOpposto
         for(unsigned int j=0;j<3;j++){
-            if(triangoli[cella].lati[j]!=lato){
-                if(lati[triangoli[cella].lati[j]].punto1==lati[lato].punto1 || lati[triangoli[cella].lati[j]].punto2==lati[lato].punto1){
-                    l1 = triangoli[cella].lati[j];
+            if(triangles[cella].edges[j]!=lato){
+                if(edges[triangles[cella].edges[j]].punto1==edges[lato].punto1 || edges[triangles[cella].edges[j]].punto2==edges[lato].punto1){
+                    l1 = triangles[cella].edges[j];
                 }
                 else{
-                    l2 = triangoli[cella].lati[j];}
+                    l2 = triangles[cella].edges[j];}
             }
         }
         // Creo prima cella
-        triangoli.push_back(Cell(lati[lato].punto1,verticeopp,lati[lato].pm,lato_bisez,lati[lato].p1m,l1,punti));
+        triangles.push_back(Cell(edges[lato].punto1,verticeopp,edges[lato].midpoint,lato_bisez,edges[lato].p1_midpoint,l1,points));
         // riempio adiacenze della prima cella
-        if(lati[lati[lato].p1m].cella1 == -1){
-            lati[lati[lato].p1m].cella1 = maxIDC;
+        if(edges[edges[lato].p1_midpoint].cella1 == -1){
+            edges[edges[lato].p1_midpoint].cella1 = dim_vect_cells;
         }
         else{
-            lati[lati[lato].p1m].cella2 = maxIDC;
+            edges[edges[lato].p1_midpoint].cella2 = dim_vect_cells;
         }
-        if(lati[lato_bisez].cella1 == -1){
-            lati[lato_bisez].cella1 = maxIDC;
+        if(edges[lato_bisez].cella1 == -1){
+            edges[lato_bisez].cella1 = dim_vect_cells;
         }else{
-            lati[lato_bisez].cella2 = maxIDC;
+            edges[lato_bisez].cella2 = dim_vect_cells;
         }
-        if(lati[l1].cella1 == cella){
-            lati[l1].cella1 = maxIDC;
+        if(edges[l1].cella1 == cella){
+            edges[l1].cella1 = dim_vect_cells;
         }else{
-            lati[l1].cella2 = maxIDC;
+            edges[l1].cella2 = dim_vect_cells;
         }
-        maxIDC = maxIDC+1;
+        dim_vect_cells = dim_vect_cells+1;
 
         // creo seconda cella
-        triangoli.push_back(Cell(lati[lato].punto2,verticeopp,lati[lato].pm,lato_bisez,lati[lato].mp2,l2,punti));
+        triangles.push_back(Cell(edges[lato].punto2,verticeopp,edges[lato].midpoint,lato_bisez,edges[lato].midpoint_p2,l2,points));
         // riempio adiacenze della seconda cella
-        if(lati[lato_bisez].cella1 == -1){
-            lati[lato_bisez].cella1 = maxIDC;
+        if(edges[lato_bisez].cella1 == -1){
+            edges[lato_bisez].cella1 = dim_vect_cells;
         }else{
-            lati[lato_bisez].cella2 = maxIDC;
+            edges[lato_bisez].cella2 = dim_vect_cells;
         }
-        if(lati[lati[lato].mp2].cella1 == -1){
-            lati[lati[lato].mp2].cella1 = maxIDC;
+        if(edges[edges[lato].midpoint_p2].cella1 == -1){
+            edges[edges[lato].midpoint_p2].cella1 = dim_vect_cells;
         }else{
-            lati[lati[lato].mp2].cella2 = maxIDC;
+            edges[edges[lato].midpoint_p2].cella2 = dim_vect_cells;
         }
-        if(lati[l2].cella1 == cella){
-            lati[l2].cella1 = maxIDC;
+        if(edges[l2].cella1 == cella){
+            edges[l2].cella1 = dim_vect_cells;
         }else{
-            lati[l2].cella2 = maxIDC;
+            edges[l2].cella2 = dim_vect_cells;
         }
-        maxIDC = maxIDC+1;
+        dim_vect_cells = dim_vect_cells+1;
 
     }
 
     // SE lato  NON è IL LATO MAGGIORE DIVIDO CELLA IN 3
     else{
-        int latomax = LatoMaggiore(triangoli[cella],lati);
+        int latomax = LatoMaggiore(triangles[cella],edges);
         // controllo che latomax non sia stato diviso se no lo divido
-        if (lati[latomax].p1m < 0 || lati[latomax].mp2 < 0 || lati[latomax].pm < 0){
-            PuntoMedio(lati[latomax],punti);
-            lati[latomax].pm = maxIDP;
-            maxIDP = maxIDP+1;
-            // creo 2 nuovi lati da latomax
-            lati.push_back(Segment(lati[latomax].punto1,lati[latomax].pm,punti));
-            lati.push_back(Segment(lati[latomax].pm,lati[latomax].punto2,punti));
-            lati[latomax].p1m = maxIDS;
-            lati[latomax].mp2 = maxIDS+1;
-            maxIDS = maxIDS+2;
+        if (edges[latomax].p1_midpoint < 0 || edges[latomax].midpoint_p2 < 0 || edges[latomax].midpoint < 0){
+            PuntoMedio(edges[latomax],points);
+            edges[latomax].midpoint = dim_vect_points;
+            dim_vect_points = dim_vect_points+1;
+            // creo 2 nuovi edges da latomax
+            edges.push_back(Segment(edges[latomax].punto1,edges[latomax].midpoint,points));
+            edges.push_back(Segment(edges[latomax].midpoint,edges[latomax].punto2,points));
+            edges[latomax].p1_midpoint = dim_vect_edges;
+            edges[latomax].midpoint_p2 = dim_vect_edges+1;
+            dim_vect_edges = dim_vect_edges+2;
         }
 
         // creo taglio dal punto medio di lato al punto medio di latomax
-        lati.push_back(Segment(lati[lato].pm,lati[latomax].pm,punti));
-        int taglio = maxIDS;
-        maxIDS = maxIDS+1;
-        int PuntoComune = VerticeComune(lati[lato],lati[latomax]);
+        edges.push_back(Segment(edges[lato].midpoint,edges[latomax].midpoint,points));
+        int taglio = dim_vect_edges;
+        dim_vect_edges = dim_vect_edges+1;
+        int PuntoComune = VerticeComune(edges[lato],edges[latomax]);
         // punto opposto a latomax
-        int puntotaglio2 = VerticeOpposto(triangoli[cella],lati[latomax]);
+        int puntotaglio2 = VerticeOpposto(triangles[cella],edges[latomax]);
         // creo segmento da punto medio di latomax a al suo vertice opposto puntotaglio2
-        lati.push_back(Segment (lati[latomax].pm,puntotaglio2,punti));
-        int taglio2 = maxIDS;
-        maxIDS = maxIDS+1;
+        edges.push_back(Segment (edges[latomax].midpoint,puntotaglio2,points));
+        int taglio2 = dim_vect_edges;
+        dim_vect_edges = dim_vect_edges+1;
 
         int latopuntocomune; // Lato generato da divisione di 'lato' dalla parte di PuntoComune
         int latopuntotaglio2; // Lato generato da divisione di 'lato' dalla parte di puntotaglio2
-        // devo riempire questi id con i lati giusti:
-        if (lati[lati[lato].p1m].punto1==PuntoComune || lati[lati[lato].p1m].punto2==PuntoComune){
-            latopuntocomune = lati[lato].p1m;
-            latopuntotaglio2 = lati[lato].mp2;
-        }else{latopuntocomune = lati[lato].mp2;
-            latopuntotaglio2 = lati[lato].p1m;}
+        // devo riempire questi id con i edges giusti:
+        if (edges[edges[lato].p1_midpoint].punto1==PuntoComune || edges[edges[lato].p1_midpoint].punto2==PuntoComune){
+            latopuntocomune = edges[lato].p1_midpoint;
+            latopuntotaglio2 = edges[lato].midpoint_p2;
+        }else{latopuntocomune = edges[lato].midpoint_p2;
+            latopuntotaglio2 = edges[lato].p1_midpoint;}
 
         int latoLMpuntocomune; // Lato generato da divisione di 'latomax' dalla parte di PuntoComune
         int latoLMverticeopp; // Lato generato da divisione di 'latomax' dalla parte di verticeopp
-        // devo riempire questi id con i lati giusti:
-        if (lati[lati[latomax].p1m].punto1==PuntoComune || lati[lati[latomax].p1m].punto2==PuntoComune){
-            latoLMpuntocomune = lati[latomax].p1m;
-            latoLMverticeopp = lati[latomax].mp2;
-        }else{latoLMpuntocomune = lati[latomax].mp2;
-            latoLMverticeopp = lati[latomax].p1m;}
+        // devo riempire questi id con i edges giusti:
+        if (edges[edges[latomax].p1_midpoint].punto1==PuntoComune || edges[edges[latomax].p1_midpoint].punto2==PuntoComune){
+            latoLMpuntocomune = edges[latomax].p1_midpoint;
+            latoLMverticeopp = edges[latomax].midpoint_p2;
+        }else{latoLMpuntocomune = edges[latomax].midpoint_p2;
+            latoLMverticeopp = edges[latomax].p1_midpoint;}
         int terzolato; // Individua il lato di 'cella' che non è 'latomax' nè 'lato'
-        if (triangoli[cella].lati[0]!=lato && triangoli[cella].lati[0]!=latomax){
-            terzolato=triangoli[cella].lati[0];
-        }else{if (triangoli[cella].lati[1]!=lato && triangoli[cella].lati[1]!=latomax){
-                terzolato=triangoli[cella].lati[1];
-            }else{terzolato=triangoli[cella].lati[2];}
+        if (triangles[cella].edges[0]!=lato && triangles[cella].edges[0]!=latomax){
+            terzolato=triangles[cella].edges[0];
+        }else{if (triangles[cella].edges[1]!=lato && triangles[cella].edges[1]!=latomax){
+                terzolato=triangles[cella].edges[1];
+            }else{terzolato=triangles[cella].edges[2];}
         }
 
-        // Creo le tre nuove celle generate dalla separazione di quella più grande
-        triangoli.push_back(Cell(lati[lato].pm,lati[latomax].pm,PuntoComune,latopuntocomune,latoLMpuntocomune,taglio,punti));
-        // riempio adiacenze di tutti i nuovi lati
-        if(lati[latopuntocomune].cella1 == -1){
-            lati[latopuntocomune].cella1 = maxIDC;
+        // Creo le tre nuove cells generate dalla separazione di quella più grande
+        triangles.push_back(Cell(edges[lato].midpoint,edges[latomax].midpoint,PuntoComune,latopuntocomune,latoLMpuntocomune,taglio,points));
+        // riempio adiacenze di tutti i nuovi edges
+        if(edges[latopuntocomune].cella1 == -1){
+            edges[latopuntocomune].cella1 = dim_vect_cells;
         }else{
-            lati[latopuntocomune].cella2 = maxIDC;
+            edges[latopuntocomune].cella2 = dim_vect_cells;
         }
-        if(lati[latoLMpuntocomune].cella1 == -1){
-            lati[latoLMpuntocomune].cella1 = maxIDC;
+        if(edges[latoLMpuntocomune].cella1 == -1){
+            edges[latoLMpuntocomune].cella1 = dim_vect_cells;
         }else{
-            lati[latoLMpuntocomune].cella2 = maxIDC;
+            edges[latoLMpuntocomune].cella2 = dim_vect_cells;
         }
-        if(lati[taglio].cella1 == -1){
-            lati[taglio].cella1 = maxIDC;
+        if(edges[taglio].cella1 == -1){
+            edges[taglio].cella1 = dim_vect_cells;
         }else{
-            lati[taglio].cella2 = maxIDC;
+            edges[taglio].cella2 = dim_vect_cells;
         }
-        maxIDC = maxIDC+1;
+        dim_vect_cells = dim_vect_cells+1;
 
-        triangoli.push_back(Cell(lati[lato].pm,lati[latomax].pm,puntotaglio2,latopuntotaglio2,taglio,taglio2,punti));
-        // riempio adiacenze di tutti i nuovi lati
-        if(lati[latopuntotaglio2].cella1 == -1){
-            lati[latopuntotaglio2].cella1 = maxIDC;
+        triangles.push_back(Cell(edges[lato].midpoint,edges[latomax].midpoint,puntotaglio2,latopuntotaglio2,taglio,taglio2,points));
+        // riempio adiacenze di tutti i nuovi edges
+        if(edges[latopuntotaglio2].cella1 == -1){
+            edges[latopuntotaglio2].cella1 = dim_vect_cells;
         }else{
-            lati[latopuntotaglio2].cella2 = maxIDC;
+            edges[latopuntotaglio2].cella2 = dim_vect_cells;
         }
-        if(lati[taglio].cella1 == -1){
-            lati[taglio].cella1 = maxIDC;
+        if(edges[taglio].cella1 == -1){
+            edges[taglio].cella1 = dim_vect_cells;
         }else{
-            lati[taglio].cella2 = maxIDC;
+            edges[taglio].cella2 = dim_vect_cells;
         }
-        if(lati[taglio2].cella1 == -1){
-            lati[taglio2].cella1 = maxIDC;
+        if(edges[taglio2].cella1 == -1){
+            edges[taglio2].cella1 = dim_vect_cells;
         }else{
-            lati[taglio2].cella2 = maxIDC;
+            edges[taglio2].cella2 = dim_vect_cells;
         }
-        maxIDC = maxIDC+1;
+        dim_vect_cells = dim_vect_cells+1;
 
-        triangoli.push_back(Cell(puntotaglio2,verticeopp,lati[latomax].pm,terzolato,latoLMverticeopp,taglio2,punti));
-        // riempio adiacenze di tutti i nuovi lati
-        if(lati[terzolato].cella1 == cella){
-            lati[terzolato].cella1 = maxIDC;
+        triangles.push_back(Cell(puntotaglio2,verticeopp,edges[latomax].midpoint,terzolato,latoLMverticeopp,taglio2,points));
+        // riempio adiacenze di tutti i nuovi edges
+        if(edges[terzolato].cella1 == cella){
+            edges[terzolato].cella1 = dim_vect_cells;
         }else{
-            lati[terzolato].cella2 = maxIDC;
+            edges[terzolato].cella2 = dim_vect_cells;
         }
-        if(lati[latoLMverticeopp].cella1 == -1){
-            lati[latoLMverticeopp].cella1 = maxIDC;
+        if(edges[latoLMverticeopp].cella1 == -1){
+            edges[latoLMverticeopp].cella1 = dim_vect_cells;
         }else{
-            lati[latoLMverticeopp].cella2 = maxIDC;
+            edges[latoLMverticeopp].cella2 = dim_vect_cells;
         }
-        if(lati[taglio2].cella1 == -1){
-            lati[taglio2].cella1 = maxIDC;
+        if(edges[taglio2].cella1 == -1){
+            edges[taglio2].cella1 = dim_vect_cells;
         }else{
-            lati[taglio2].cella2 = maxIDC;
+            edges[taglio2].cella2 = dim_vect_cells;
         }
-        maxIDC = maxIDC+1;
+        dim_vect_cells = dim_vect_cells+1;
     }
 }
 
@@ -276,38 +276,38 @@ void DividiCella(int& cella,
 
 void RaffinaCella(int& cella,
                   int& lato,
-                  std::vector<Cell>& triangoli,
-                  std::vector<Segment>& lati,
-                  std::vector<Point>& punti,
-                  int& maxIDP,
-                  int& maxIDS,
-                  int& maxIDC){
-    int latomax = LatoMaggiore(triangoli[cella],lati);
+                  std::vector<Cell>& triangles,
+                  std::vector<Segment>& edges,
+                  std::vector<Point>& points,
+                  int& dim_vect_points,
+                  int& dim_vect_edges,
+                  int& dim_vect_cells){
+    int latomax = LatoMaggiore(triangles[cella],edges);
     int CellaDopo;
-    if (cella!=lati[latomax].cella1) {CellaDopo = lati[latomax].cella1;}
-    else {CellaDopo = lati[latomax].cella2;}
-    DividiCella(cella,lato,triangoli,lati,punti,maxIDP,maxIDS,maxIDC);
+    if (cella!=edges[latomax].cella1) {CellaDopo = edges[latomax].cella1;}
+    else {CellaDopo = edges[latomax].cella2;}
+    DividiCella(cella,lato,triangles,edges,points,dim_vect_points,dim_vect_edges,dim_vect_cells);
     if (CellaDopo > -1){
-        if (latomax==(LatoMaggiore(triangoli[CellaDopo],lati))){
-            DividiCella(CellaDopo,latomax,triangoli,lati,punti,maxIDP,maxIDS,maxIDC);
+        if (latomax==(LatoMaggiore(triangles[CellaDopo],edges))){
+            DividiCella(CellaDopo,latomax,triangles,edges,points,dim_vect_points,dim_vect_edges,dim_vect_cells);
         }
         else{
-            RaffinaCella(CellaDopo,latomax,triangoli,lati,punti,maxIDP,maxIDS,maxIDC);
+            RaffinaCella(CellaDopo,latomax,triangles,edges,points,dim_vect_points,dim_vect_edges,dim_vect_cells);
         }}
 }
 
-/// 4. 	Inizializzo contatore per la size dei triangoli (celle)
+/// 4. 	Inizializzo contatore per la size dei triangles (cells)
 
-int MaxCelle(std::vector<Cell>& triangoli){
-    unsigned int contatore = triangoli.size();
+int Maxcells(std::vector<Cell>& triangles){
+    unsigned int contatore = triangles.size();
     int max = -1;
     double areamax = 0;
     for(unsigned int i = 0;i<contatore;i++){
-        if (triangoli[i].flag && triangoli[i].area > areamax )
+        if (triangles[i].flag && triangles[i].area > areamax )
         {
             // se booleano=true e se l’area del triangolo è maggiore dell’attuale area massima --->
             // ---> allora assegna all’area massima l’area di quel triangolo
-            max=i; areamax = triangoli[i].area;
+            max=i; areamax = triangles[i].area;
         }
     }
     return max;
