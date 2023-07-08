@@ -170,6 +170,6 @@ void RaffinaCella(int& cella,
                   int& dim_vect_edges,
                   int& dim_vect_cells);
 
-int Maxcells(vector<Cell>& triangles);
+int TrovaIdCellaAreaMax(vector<Cell>& triangles);
 }
 #endif // __EMPTY_H

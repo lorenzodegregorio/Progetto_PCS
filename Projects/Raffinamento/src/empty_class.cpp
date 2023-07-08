@@ -298,16 +298,17 @@ void RaffinaCella(int& cella,
 
 /// 4. 	Inizializzo contatore per la size dei triangles (cells)
 
-int Maxcells(std::vector<Cell>& triangles){
+int TrovaIdCellaAreaMax(std::vector<Cell>& triangles){
     unsigned int contatore = triangles.size();
     int max = -1;
     double areamax = 0;
     for(unsigned int i = 0;i<contatore;i++){
         if (triangles[i].flag && triangles[i].area > areamax )
         {
-            // se booleano=true e se l’area del triangolo è maggiore dell’attuale area massima --->
-            // ---> allora assegna all’area massima l’area di quel triangolo
-            max=i; areamax = triangles[i].area;
+            // se flag booleano=true e se l’area del triangolo è maggiore dell’attuale area massima --->
+            // ---> allora:
+            max = i;  // assegno l'indice all'indice di area massima
+            areamax = triangles[i].area;  // l'area del triangolo all'area massima
         }
     }
     return max;
