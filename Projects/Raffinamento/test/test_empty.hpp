@@ -107,7 +107,7 @@ TEST(TestImport, TestImportCells){
 
 
 /// T4. aggiungo i primi due punti al vettore "points" e trovo il punto medio
-TEST(TestGeometry, TestPuntoMedio) //ok?
+TEST(TestGeometry, TestCreaPuntoMedio) //ok?
 { vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,0.5};
 
@@ -123,7 +123,7 @@ TEST(TestGeometry, TestPuntoMedio) //ok?
 
     ProjectLibrary::Segment lato(p1_id,p2_id,points);
 
-    ProjectLibrary::PuntoMedio(lato, points);
+    ProjectLibrary::CreaPuntoMedio(lato, points);
 
     ProjectLibrary::Point midpoint = points[points.size()-1];
 
@@ -135,7 +135,7 @@ TEST(TestGeometry, TestPuntoMedio) //ok?
 
 /// T5. aggiungo i primi tre punti e i primi tre lati ai rispettivi vettori,
 /// dopodiché trovo vertice opposto
-TEST(TestGeometry, TestVerticeOpposto){
+TEST(TestGeometry, TestTrovaVerticeOpposto){
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
     vector<ProjectLibrary::Point> points;
@@ -166,7 +166,7 @@ TEST(TestGeometry, TestVerticeOpposto){
 
     ProjectLibrary::Cell triangolo(p1_id,p2_id,p3_id,l1_id,l2_id,l3_id,points);
 
-    int vertopp = VerticeOpposto(triangolo,lato1);
+    int vertopp = TrovaVerticeOpposto(triangolo,lato1);
 
     EXPECT_EQ(vertopp, 2);
 }
@@ -174,7 +174,7 @@ TEST(TestGeometry, TestVerticeOpposto){
 
 /// T6. aggiungo i primi tre punti e i primi tre lati ai rispettivi vettori,
 /// dopodiché trovo lato maggiore
-TEST(TestGeometry, TestLatoMaggiore){
+TEST(TestGeometry, TestTrovaLatoMaggiore){
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
     vector<ProjectLibrary::Point> points;
@@ -205,7 +205,7 @@ TEST(TestGeometry, TestLatoMaggiore){
 
     ProjectLibrary::Cell triangolo(p1_id,p2_id,p3_id,l1_id,l2_id,l3_id,points);
 
-    int latomax = ProjectLibrary::LatoMaggiore(triangolo,edges);
+    int latomax = ProjectLibrary::TrovaLatoMaggiore(triangolo,edges);
 
     EXPECT_EQ(latomax, l1_id);
 }
@@ -213,7 +213,7 @@ TEST(TestGeometry, TestLatoMaggiore){
 
 /// T7. aggiungo i primi tre punti al vettore "points",
 /// trovo punto comune tra i due lati
-TEST(TestGeometry, TestVerticeComune){
+TEST(TestGeometry, TestTrovaVerticeComune){
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
 
@@ -232,7 +232,7 @@ TEST(TestGeometry, TestVerticeComune){
 
     ProjectLibrary::Segment lato1(p1_id,p3_id,points);
     ProjectLibrary::Segment lato2(p2_id,p3_id,points);
-    int puntocomune = ProjectLibrary::VerticeComune(lato1,lato2);
+    int puntocomune = ProjectLibrary::TrovaVerticeComune(lato1,lato2);
     EXPECT_EQ(puntocomune, 2);
 }
 
@@ -240,7 +240,7 @@ TEST(TestGeometry, TestVerticeComune){
 /// T8. aggiungo i primi tre punti, i primi tre segmenti e le prime tre celle
 /// ai rispettivi vettori;
 /// trovo lato maggiore e divido cella
-TEST(Testcells, TestDividiCellaPerLatoMaggiore){ //ok?
+TEST(Testcells, TestDividiCellaPerTrovaLatoMaggiore){ //ok?
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
 
@@ -279,7 +279,7 @@ TEST(Testcells, TestDividiCellaPerLatoMaggiore){ //ok?
     int IDE = 3;
     int IDC = 1;
 
-    int latomax = ProjectLibrary::LatoMaggiore(triangolo,edges);
+    int latomax = ProjectLibrary::TrovaLatoMaggiore(triangolo,edges);
     ProjectLibrary::DividiCella(c1_id,latomax,triangles,edges,points,IDP,IDE,IDC);
     //
     std::vector<unsigned int> resultID = {0, 1, 2};

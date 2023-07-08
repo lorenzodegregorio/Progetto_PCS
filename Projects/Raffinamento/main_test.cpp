@@ -94,7 +94,7 @@ TEST(TestImport, TestImportCells){
 }
 
 
-TEST(TestGeometry, TestPuntoMedio) //ok?
+TEST(TestGeometry, TestCreaPuntoMedio) //ok?
 { vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,0.5};
 
@@ -110,7 +110,7 @@ TEST(TestGeometry, TestPuntoMedio) //ok?
 
     ProjectLibrary::Segment lato(p1_id,p2_id,points);
 
-    ProjectLibrary::PuntoMedio(lato, points);
+    ProjectLibrary::CreaPuntoMedio(lato, points);
 
     ProjectLibrary::Point midpoint = points[points.size()-1];
 
@@ -119,7 +119,7 @@ TEST(TestGeometry, TestPuntoMedio) //ok?
     EXPECT_EQ(points.size(), 3);
 }
 
-TEST(TestGeometry, TestVerticeOpposto){ //ok?
+TEST(TestGeometry, TestTrovaVerticeOpposto){ //ok?
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
     vector<ProjectLibrary::Point> points;
@@ -150,12 +150,12 @@ TEST(TestGeometry, TestVerticeOpposto){ //ok?
 
     ProjectLibrary::Cell triangolo(p1_id,p2_id,p3_id,l1_id,l2_id,l3_id,points);
 
-    int vertopp = VerticeOpposto(triangolo,lato1);
+    int vertopp = TrovaVerticeOpposto(triangolo,lato1);
 
     EXPECT_EQ(vertopp, 2);
 }
 
-TEST(TestGeometry, TestLatoMaggiore){ //ok?
+TEST(TestGeometry, TestTrovaLatoMaggiore){ //ok?
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
     vector<ProjectLibrary::Point> points;
@@ -186,12 +186,12 @@ TEST(TestGeometry, TestLatoMaggiore){ //ok?
 
     ProjectLibrary::Cell triangolo(p1_id,p2_id,p3_id,l1_id,l2_id,l3_id,points);
 
-    int latomax = ProjectLibrary::LatoMaggiore(triangolo,edges);
+    int latomax = ProjectLibrary::TrovaLatoMaggiore(triangolo,edges);
 
     EXPECT_EQ(latomax, l1_id);
 }
 
-TEST(TestGeometry, TestVerticeComune){ //ok?
+TEST(TestGeometry, TestTrovaVerticeComune){ //ok?
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
 
@@ -210,11 +210,11 @@ TEST(TestGeometry, TestVerticeComune){ //ok?
 
     ProjectLibrary::Segment lato1(p1_id,p3_id,points);
     ProjectLibrary::Segment lato2(p2_id,p3_id,points);
-    int puntocomune = ProjectLibrary::VerticeComune(lato1,lato2);
+    int puntocomune = ProjectLibrary::TrovaVerticeComune(lato1,lato2);
     EXPECT_EQ(puntocomune, 2);
 }
 
-TEST(Testcells, TestDividiCellaPerLatoMaggiore){ //ok?
+TEST(Testcells, TestDividiCellaPerTrovaLatoMaggiore){ //ok?
     vector<double> ascisse ={0.0,1.0,0.5};
     vector<double> ordinate ={0.0,1.0,1.0};
 
@@ -253,7 +253,7 @@ TEST(Testcells, TestDividiCellaPerLatoMaggiore){ //ok?
     int IDE = 3;
     int IDC = 1;
 
-    int latomax = ProjectLibrary::LatoMaggiore(triangolo,edges);
+    int latomax = ProjectLibrary::TrovaLatoMaggiore(triangolo,edges);
     ProjectLibrary::DividiCella(c1_id,latomax,triangles,edges,points,IDP,IDE,IDC);
     //
     std::vector<unsigned int> resultID = {0, 1, 2};

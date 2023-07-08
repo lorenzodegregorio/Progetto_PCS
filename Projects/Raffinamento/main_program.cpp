@@ -35,13 +35,13 @@ int main()
     cout<<"Numero celle (Prima di Dividere): "<<triangles.size()<<endl;
 
 
-    // 4) Raffinamento: usa TrovaIdCellaAreaMax, LatoMaggiore e RaffinaCella
+    // 4) Raffinamento: usa TrovaIdCellaAreaMax, TrovaLatoMaggiore e RaffinaCella
 
     int it = 0; // iterazione in corso
     for (int i = 0; i < max_it; i++){
         int j = TrovaIdCellaAreaMax(triangles);
         if (triangles[j].area > theta){ // Controllo criterio theta per area max
-            int k = LatoMaggiore(triangles[j],edges);
+            int k = TrovaLatoMaggiore(triangles[j],edges);
             RaffinaCella(j,k,triangles,edges,points,dim_vect_points,dim_vect_edges,dim_vect_cells);
             it++;
         }

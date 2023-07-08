@@ -20,12 +20,15 @@ public:
     double x;
     double y;
 
-    Point(double& x_,
-          double& y_){x=x_;y=y_;}
+    Point(double& asc, double& ord )
+    {
+        x=asc;
+        y=ord;
+    }
 };
 
-// 1c. La classe Segment ha per attributi l'ID dei points estremi, la lunghezza,
-// il punto medio e le due cells adiacenti
+// 1c. La classe Segment ha per attributi l'ID dei punti estremi, la lunghezza,
+// il punto medio e le due celle adiacenti
 class Segment{
 public:
     int punto1;
@@ -40,27 +43,31 @@ public:
     // Calcolo della lunghezza
     Segment(int& punto1_,
             int& punto2_,
-            std::vector<Point>& univpoints){ punto1=punto1_;
+            std::vector<Point>& points_vect)
+    {
+        punto1=punto1_;
         punto2=punto2_;
-        lunghezza =sqrt((abs(univpoints[punto1_].x-univpoints[punto2_].x))*(abs(univpoints[punto1_].x-univpoints[punto2_].x))+(abs(univpoints[punto1_].y-univpoints[punto2_].y))*(abs(univpoints[punto1_].y-univpoints[punto2_].y)));}
+        lunghezza =sqrt((abs(points_vect[punto1_].x-points_vect[punto2_].x))*(abs(points_vect[punto1_].x-points_vect[punto2_].x))+(abs(points_vect[punto1_].y-points_vect[punto2_].y))*(abs(points_vect[punto1_].y-points_vect[punto2_].y)));
+    }
 
     friend bool operator>(const Segment& lato1, const Segment& lato2) {
-        return (lato1.lunghezza - lato2.lunghezza > 0.0);
+        return (lato1.lunghezza > lato2.lunghezza);
+        // funzione booleana che restitisce TRUE se lato1 > lato2
     }
 };
 
-// 1c. La classe Cell ha per attributi i suoi points, i suoi edges, l'area e
+// 1c. La classe Cell ha per attributi i suoi punti, i suoi lati, l'area e
 // un booleano per distruggere la cella
 class Cell{
 public:
     vector<int> points; // essendo vettori potrebbero essere un problema
     vector<int> edges;
     double area;
-    bool flag; // distrugge cells
+    bool flag; // distrugge cella
 
 
     /// 2. chiamo la funzione Cell:
-        /// 2a. aggiungo i tre points al vettore points e i tre edges al vettore edges,
+        /// 2a. aggiungo i tre punti al vettore points e i tre lati al vettore edges,
         /// 2b. pongo l’indicatore booleano = vero e calcolo l’area del triangolo
 
     Cell(int& punto1,int& punto2,int& punto3,int& lato1,int& lato2,int& lato3,
@@ -78,56 +85,63 @@ public:
 
 
 
-/// 3. METODI: operazioni sul lato più lòungo della cella
+/// 3. METODI: operazioni sul lato più lungo della cella
 
 /// 3a. Trova lato più lungo (confronta i 3 edges con if/else)
 
-inline int LatoMaggiore(Cell& cella, std::vector<Segment>& univedges) {
+inline int TrovaLatoMaggiore(Cell& cella, std::vector<Segment>& univedges) {
+
+    int lato_max = 0;
+
     if (univedges[cella.edges[0]] > univedges[cella.edges[1]] && univedges[cella.edges[0]] > univedges[cella.edges[2]]) {
-        int lm = cella.edges[0];
-        return lm;
+        lato_max = cella.edges[0];
     }
+
     else if (univedges[cella.edges[1]] > univedges[cella.edges[2]]) {
-        int lm = cella.edges[1];
-        return lm;
+        lato_max = cella.edges[1];
     }
+
     else {
-        int lm = cella.edges[2];
-        return lm;
+        lato_max = cella.edges[2];
     }
+
+    return lato_max;
 }
 
 /// 3b. Crea punto medio del lato massimo trovato in (3a.)
 
-inline void PuntoMedio(Segment& lato,std::vector<Point>& points){
-    double x_med=(points[lato.punto1].x+points[lato.punto2].x)*0.5;
-    double y_med=(points[lato.punto1].y+points[lato.punto2].y)*0.5;
+inline void CreaPuntoMedio(Segment& lato,std::vector<Point>& points)
+{
     // crea nuovo punto
-    points.push_back(Point(x_med,y_med));
-    ;}
+    double asc_mid=(points[lato.punto1].x+points[lato.punto2].x)*0.5;
+    double ord_mid=(points[lato.punto1].y+points[lato.punto2].y)*0.5;
+    // aggiungi nuovo punto al vettore points
+    points.push_back(Point(asc_mid,ord_mid));
+
+}
 
 /// 3c. Trova vertice opposto al lato massimo trovato in (3a.)
 
-inline int VerticeOpposto(Cell& cella,Segment& lato){
-    int i = 0;
-    int punto = cella.points[i];
-    while(punto==lato.punto1 || punto==lato.punto2){
-        i = i +1;
-        punto = cella.points[i];
+inline int TrovaVerticeOpposto(const Cell& cella, const Segment& lato) {
+    for (int i = 0; i < 3; i++)
+    {
+        int punto = cella.points[i];
+        if (punto != lato.punto1 && punto != lato.punto2)
+        {
+            return punto;
+        }
     }
-    return punto;
+    return -1; // Se non trova il vertice
 }
 
-/// 3d. Trova puntatore a vertice comune tra due edges, dando per scontato che ci sia
+/// 3d. Trova puntatore a vertice comune tra due lati, dando per scontato che esista
 
-inline int VerticeComune(Segment& lato1,Segment& lato2){
+inline int TrovaVerticeComune(Segment& lato1,Segment& lato2){
     int punto;
-    if (lato1.punto1==lato2.punto1){
+    if (lato1.punto1==lato2.punto1 || lato1.punto1==lato2.punto2){
         punto=lato1.punto1;
     }
-    else if (lato1.punto1==lato2.punto2){
-        punto=lato1.punto1;
-    }
+
     else{
         punto=lato1.punto2;
     }
