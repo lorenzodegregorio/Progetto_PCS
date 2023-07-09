@@ -1,5 +1,7 @@
 #include "empty_class.hpp"
 
+using namespace std;
+
 namespace ProjectLibrary
 {
 /// 1. Importa points, segmenti e cells dai file, con le rispettive proprietà
@@ -11,8 +13,8 @@ void ImportPoints(string nomefile, std::vector<Point>& points)
 
     getline(file,line); // skip etichette
     while (getline(file,line)){
-        std::replace( line.begin(), line.end(),';',' ');
-        std::istringstream conv(line);
+        replace( line.begin(), line.end(),';',' ');
+        istringstream conv(line);
         int id; // ID
         unsigned int marker; // Marker
         double x, y;
@@ -28,8 +30,8 @@ void ImportSegments(string nomefile, std::vector<Point>& points,std::vector<Segm
     file.open(nomefile);
     getline(file,line);
     while (getline(file,line)){
-        std::replace( line.begin(), line.end(),';',' ');
-        std::istringstream conv(line);
+        replace( line.begin(), line.end(),';',' ');
+        istringstream conv(line);
         int id; // ID
         unsigned int marker; // Marker
         int idOrigin;
@@ -46,8 +48,8 @@ void ImportCells(string nomefile, std::vector<Point>& points, std::vector<Segmen
     file.open(nomefile);
     getline(file,line);
     while (getline(file,line)){
-        std::replace( line.begin(), line.end(),';',' ');
-        std::istringstream conv(line);
+        replace( line.begin(), line.end(),';',' ');
+        istringstream conv(line);
         int id; // ID
         int idpunto1;
         int idpunto2;
@@ -92,9 +94,9 @@ void ImportCells(string nomefile, std::vector<Point>& points, std::vector<Segmen
 
 void DividiCella(int& cella,
                  int& lato,
-                 std::vector<Cell>& triangles,
-                 std::vector<Segment>& edges,
-                 std::vector<Point>& points,
+                 vector<Cell>& triangles,
+                 vector<Segment>& edges,
+                 vector<Point>& points,
                  int& dim_vect_points,
                  int& dim_vect_edges,
                  int& dim_vect_cells){
@@ -307,9 +309,9 @@ void DividiCella(int& cella,
 
 void RaffinaCella(int& cella,
                   int& lato,
-                  std::vector<Cell>& triangles,
-                  std::vector<Segment>& edges,
-                  std::vector<Point>& points,
+                  vector<Cell>& triangles,
+                  vector<Segment>& edges,
+                  vector<Point>& points,
                   int& dim_vect_points,
                   int& dim_vect_edges,
                   int& dim_vect_cells){
@@ -329,7 +331,7 @@ void RaffinaCella(int& cella,
 
 /// 4. 	Inizializzo contatore per la size dei triangles (cells)
 
-int TrovaIdCellaAreaMax(std::vector<Cell>& triangles){
+int TrovaIdCellaAreaMax(vector<Cell>& triangles){
     unsigned int contatore = triangles.size();
     int max = -1;
     double areamax = 0;

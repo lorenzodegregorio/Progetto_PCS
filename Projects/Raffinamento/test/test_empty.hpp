@@ -8,6 +8,7 @@
 
 
 using namespace testing;
+using namespace std;
 
 
 /// T1. copio I file di input ma ignoro la prima riga delle etichette,
@@ -76,8 +77,8 @@ TEST(TestImport, TestImportCells){
     // Id Vertices Edges
     // 0 41 43 15 0 1 2
 
-    std::vector<int> points_ = {41, 43, 15};
-    std::vector<int> edges_ = {0, 1, 2};
+    vector<int> points_ = {41, 43, 15};
+    vector<int> edges_ = {0, 1, 2};
 
     vector<ProjectLibrary::Point> points;
     string nomefile_points = "C:/Users/hp/Desktop/project_PCS/Progetto_PCS/Projects/Raffinamento/Dataset/Test1/Cell0Ds.csv";
@@ -282,8 +283,8 @@ TEST(Testcells, TestDividiCellaPerTrovaLatoMaggiore){ //ok?
     int latomax = ProjectLibrary::TrovaLatoMaggiore(triangolo,edges);
     ProjectLibrary::DividiCella(c1_id,latomax,triangles,edges,points,IDP,IDE,IDC);
     //
-    std::vector<unsigned int> resultID = {0, 1, 2};
-    std::vector<double> resultAREA = {0.25, 0.125, 0.125};
+    vector<unsigned int> resultID = {0, 1, 2};
+    vector<double> resultAREA = {0.25, 0.125, 0.125};
     for(unsigned int i=0;i<2;i++){
         int it = i;
         if(triangles[i].flag==true){
@@ -337,8 +338,8 @@ TEST(Testcells, TestDividiCellaPerLatoQualsiasi){ //ok?
     int IDC = 1;
     ProjectLibrary::DividiCella(c1_id,l2_id,triangles,edges,points,IDP,IDE,IDC);
     //
-    std::vector<unsigned int> resultID = {0, 1, 2, 3};
-    std::vector<double> resultAREA = {0.25 ,0.0625, 0.0625,0.125};
+    vector<unsigned int> resultID = {0, 1, 2, 3};
+    vector<double> resultAREA = {0.25 ,0.0625, 0.0625,0.125};
     for(unsigned int i=0;i<3;i++){
         int it = i;
         if(triangles[i].flag==true){
