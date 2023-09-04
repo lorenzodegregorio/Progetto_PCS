@@ -47,7 +47,7 @@ public:
     {
         punto1=punto1_;
         punto2=punto2_;
-        lunghezza =sqrt((abs(points_vect[punto1_].x-points_vect[punto2_].x))*(abs(points_vect[punto1_].x-points_vect[punto2_].x))+(abs(points_vect[punto1_].y-points_vect[punto2_].y))*(abs(points_vect[punto1_].y-points_vect[punto2_].y)));
+        lunghezza =sqrt((points_vect[punto1_].x-points_vect[punto2_].x)*(points_vect[punto1_].x-points_vect[punto2_].x)+(points_vect[punto1_].y-points_vect[punto2_].y)*(points_vect[punto1_].y-points_vect[punto2_].y));
     }
 
     friend bool operator>(const Segment& lato1, const Segment& lato2) {
